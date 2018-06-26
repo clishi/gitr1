@@ -1,0 +1,35 @@
+search volume 
+select VOLUME_NAME from libvolumes where libvolumes.STATUS='Private' and VOLUME_NAME IN (select VOLUME_NAME from volumes where volumes.STGPOOL_name='USER_COPY_POOL')
+
+calculate node filespace
+
+select NODE_NAME, STGPOOL_NAME,FILESPACE_NAME,PHYSICAL_MB from occupancy where NODE_NAME='LIUYCRL' AND STGPOOL_NAME!='USER_COPY_POOL' AND FILESPACE_NAME!=''
+
+SELECT SUM(PHYSICAL_MB) FROM OCCUPANCY  where NODE_NAME='SHIL' AND STGPOOL_NAME!='USER_COPY_POOL' AND STGPOOL_NAME!='USER_NEXT_POOL AND FILESPACE_NAME!=''
+
+
+calculate group filespace
+
+SELECT SUM(PHYSICAL_MB) FROM OCCUPANCY WHERE STGPOOL_NAME!='USER_COPY_POOL' AND NODE_NAME IN (SELECT NODE_NAME from NODEGROUP where NODEGROUP.NODEGROUP_NAME='ZHUJUNTEAM')
+
+calculate pool capacity
+
+select sum(PHYSICAL_MB) from occupancy where  STGPOOL_NAME='USER_POOL' 
+
+export node
+
+export node kunzhang,xujitao,shil domain=user_domain devclass=ltoclass1 filedata=all preview=no scratch=yes
+
+select sum(PHYSICAL_MB) from occupancy where NODE_NAME='LIUYCRL' AND STGPOOL_NAME!='USER_COPY_POOL' AND FILESPACE_NAME!=''
+
+
+SELECT volumes.volume_name, volumes.stgpool_name, volumes.pct_utilized, volumes.status, volumes.write_errors, volumes.read_errors FROM volumes, libvolumes WHERE volumes.volume_name=libvolumes.volume_name AND ( volumes.write_errors>0 OR volumes.read_errors>0 )
+
+SELECT libvolumes.volume_name FROM libvolumes WHERE libvolumes.status='Scratch' and libvolumes.library_name='3584LTO6'
+
+
+SELECT volumes.volume_name, volumes.stgpool_name FROM volumes, libvolumes WHERE volumes.volume_name=libvolumes.volume_name AND volumes.stgpool_name='L6P_DRP1' AND volumes.pct_utilized < '30'
+SELECT volumes.volume_name, volumes.stgpool_name FROM volumes, libvolumes WHERE volumes.volume_name=libvolumes.volume_name AND volumes.stgpool_name='L6P_DRCP' AND volumes.pct_utilized < '30'
+
+cat /proc/cpuinfo |grep "cores"|uniq
+cat /proc/cpuinfo |grep "physical id"|sort |uniq|wc -l

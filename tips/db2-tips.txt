@@ -1,0 +1,115 @@
+查看缓冲池大小：
+    select * from syscat.bufferpools
+    SELECT BPNAME,NPAGES,PAGESIZE FROM SYSCAT.BUFFERPOOLS
+查看那个缓冲池被分配给那个表空间：
+    select tbspace,bufferpoolid from syscat.tablespaces
+    
+修改缓冲池大小：
+    ALTER BUFFERPOOL <bp_name> SIZE <number_of_pages>
+创建缓冲池时指定大小：
+    CREATE BUFFERPOOL <bp_name> SIZE <number_of_pages> PAGESIZE <integer K>
+删除缓冲池：
+
+$ db2 drop BUFFERPOOL PAY_SYS_POOL
+
+查看容器
+    list tablespace containers for 2
+
+db2 "CREATE BUFFERPOOL PAY_SYS_POOL SIZE 8192 PAGESIZE 8192" --创建缓冲池
+db2 "create tablespace EPS_SPACE_8K PAGESIZE 8K MANAGED BY DATABASE USING (FILE '/home/db2inst1/payment3/EPS_SPACE_8K' 100M) AUTORESIZE YES BUFFERPOOL PAY_SYS_POOL" --创建表空间
+db2move payment3 import ----导入数据
+
+ 创建数据库带缓冲池
+ db2 create database ebubak1 using codeset gbk territory CN pagesize 32768
+
+ 导出数据库结构，布局，缓冲池
+ db2look -d ebubak1 -e -l -o ./biebu1.sql
+
+ 恢复数据-重定向
+ db2 restore db bi_ebu use tsm taken at 20171113202747 into ebubak1 logtarget /db2data/db2inst1/db2inst1/NODE0000/SQL00005/SQLOGDIR/ redirect generate script redirect_sample3.sql
+ 
+ 离线备份   
+ db_test
+db2 force applications all 
+db2 db2stop force
+db2start
+db2 list database directory
+db2 list active databases
+db2 deactivate database db_test
+db2 backup database db_test to "/data/DB2/db2idb/dbback" 
+#离线备份恢复
+恢复到相同数据库
+db2 restore database db_test from "/data/DB2/db2idb/dbback" 
+恢复到不同数据库
+db2 restore database db_test from "/data/DB2/db2idb/dbback" into db_dev
+   在线备份
+db2 backup db db_db online to "/data/db2data/backup/db_db" include logs
+db2 RESTORE db db_db FROM /data/db2data/backup/db_test/ taken at 20130618142149 into db_test 
+db2 rollforward db DBName to end of logs
+db2 rollforward db DBName stop
+db2 rollforward db DBName query status
+db2 rollforward db DBName complete
+    启用日志归档模式
+   
+db2 update db cfg for db_db using LOGRETAIN ON  
+#设置日志归档目录  
+db2 update db cfg for db_db using LOGARCHMETH1 DISK:/data/db2data/logs/db_db  
+#做一次离线备份，否则数据库会登录不了[如果提示有连接无法备份，请参考db2离线备份]  
+db2 backup db db_db to "/data/db2data/backup/db_db"  
+#在线备份--备份日志（首个活动日志到当前日志会一同备份到备份文件里）  
+db2 backup db db_db online to "/data/db2data/backup/db_db" include logs  
+#恢复数据-重定向
+db2 restore db bi_ebu use tsm taken at 20171113202747 into ebubak1 logtarget /db2data/db2inst1/db2inst1/NODE0000/SQL00005/SQLOGDIR/ redirect generate script redirect_sample3.sql
+ sqllib/adsm/db2adutl query db dbname
+
+db2 restore db pd1 use tsm taken at 20150616134107 logtarget ~/logretrieve
+
+db2 "rollforward db pd1  to end of logs and stop overflow log path ('/home/db2inst1/logretrieve')"
+
+
+ 增加表空间
+ 
+Db2 connect to xxx
+Db2 “LIST TABLESPACES SHOW DETAIL”
+
+1）直接添加一个容器的例子：
+
+
+
+db2 " ALTER TABLESPACE PAYROLL ADD (DEVICE '/dev/rhdisk9' 10000) "
+
+加容器之后DB2会有一个自动balance的过程,可能会持续几个小时!!! 一定要注意该选项,修改前确认该选项是否能满足业务需求!
+
+
+
+2）改变现有容器的大小(该方法不会触发balance,但如果表空间建立在裸设备上,则要扩冲裸设备空间):
+
+
+
+db2 " ALTER TABLESPACE TS1 RESIZE (FILE '/conts/cont0' 2000, DEVICE '/dev/rcont1' 2000, FILE 'cont2' 2000) "
+
+
+
+注意这种方式就是将原有的相应容器都改成大小是2000页
+
+
+
+db2 "ALTER TABLESPACE TS1 RESIZE (ALL 2000)"
+
+
+
+这种方式就是把表空间中所有的容器大小都改成2000页
+
+
+
+db2 " ALTER TABLESPACE TS1 EXTEND (FILE '/conts/cont0' 1000, DEVICE '/dev/rcont1' 1000, FILE 'cont2' 1000) "
+
+
+
+这种方式就是将相应的容器都扩大1000页，也就是增加1000页。
+
+
+
+db2 " ALTER TABLESPACE DATA_TS EXTEND (ALL 1000)"
+
+这种方式就是将所有的容器都增加1000页。

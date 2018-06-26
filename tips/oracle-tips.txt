@@ -1,0 +1,57 @@
+登录： sqlplus / as sysdba，sqlplus /nolog,conn / as sysdba
+列出 创建，进程，会话.
+SQL> show parameter processes；
+SQL> show parameter session;
+SQL> select count(*) from v$session;
+SQL> select count(*) from v$process;
+SQL> alter system set processes=300 scope=spfile;
+SQL> alter system set sessions=335 scope=spfile ;
+SQL> commit ;
+SQL> shutdown immediate;
+SQL> startup
+
+  3. 查看，创建 pfile   
+    show parameter spfile;    
+    SQL> create pfile='/oracle/app/oracle/product/11.2.0/dbhome_1/dbs/initGSP.ora' from spfile;
+        or     [oracle@logis-db]$ cd /oracle/app/oracle/admin/orcl1/pfile
+                    [oracle@logis-db]$ cp init.ora.71420095101 /oracle/app/oracle/product/11.2.0/dbhome_1/dbs/initorcl1.ora
+    SQL> startup pfile='/oracle/app/oracle/product/11.2.0/dbhome_1/dbs/initGSP.ora'
+    SQL> create spfile from pfile;
+SQL>shutdown immediate; ﻿ 
+ 
+SQL>startup
+
+
+ 4, 查询数据库服务名
+     SQL> show parameter service_name
+ 5, 查看用户使用的缺省表空间名称， 数据文件，大小
+     SQL> select username,default_tablespace from dba_users;
+     SQL> select tablespace_name,file_name from dba_data_files;
+     SQL> select tablespace_name ,sum(bytes) / 1024 / 1024 as MB from dba_data_files group by tablespace_name;
+6, 调整数据文件大小
+    SQL> ALTER DATABASE DATAFILE '/dev/vg01/file.dbf' RESIZE  999M;
+    SQL> ALTER DATABASE DATAFILE fileno AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+ 7, 创建，查看用户及目录
+     SQL > create directory dpdata1 as '/oracle/app/oracle/db1_backup'; （创建目录并分配存放路径）
+     SQL> select file_name from dba_data_files where tablespace_name ='SLM_DATA';
+     SQL > create tablespace slm_data '/oracle/app/oracle/oradata1/orcl1/slm_data' size 200m Autoextend on next 200m,'/oracle/app/oracle/oradata1/orcl1/slm_data2' size 200m Autoextend on next 200m Extent management local uniform size 200k;
+     SQL > ALTER TABLESPACE MAXDATA ADD DATAFILE '/oracle/app/oracle/oradata1/orcl1/slm_data3' SIZE 1000M Autoextend on next 200m
+     SQL>create user scuser identified by "Tang3zang" Default tablespace slm_data Temporary tablespace temp;
+    SQL> SQL>grant dba,connect,resource to scuser; （给用户授予dba、基础、开发权限）
+    SQL> Grant read,write on directory dpdata1 to scuser; 
+    SQL> select * from dba_directories;
+8, 数据库导入导出
+    SQL> expdp scuser/schem1234@orcl1 schemas=scuser dumpfile=orcl1expdp.dmp DIRECTORY=dpdata1;
+    SQL > expdp system/manager DIRECTORY=dpdata1 DUMPFILE=full.dmp FULL=y;(导出整个数据库)
+   SQL> impdp scuser/schem1234@orcl2 schemas=scuser dumpfile=orcl1expdp.dmp DIRECTORY=dpdata1;
+ 
+ 显示某用户的所有表    
+select TABLE_NAME FROM all_tables where owner = 'SCOTT';
+
+9, 备份相关
+    RMAN> delete backup of archivelog all completed before 'sysdate-5';
+    RMAN>DELETE ARCHIVELOG ALL COMPLETED BEFORE 'SYSDATE-7';(指定删除7天前的归档日志)
+    rman> list expired archivelog all;
+    rman> list backup of database summary;
+    SQL>  select START_TIME,END_TIME,STATUS,OBJECT_TYPE,OUTPUT_DEVICE_TYPE   from v$rman_status order by START_TIME;
+    rman>  list backup of database;      

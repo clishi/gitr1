@@ -1,0 +1,22 @@
+1. Spectrum_Scale_Advanced-4.2.0.3-x86_64-Linux-install --text-only
+2. RPMs located at /usr/lpp/mmfs/4.2.0.3
+3. yum localinstall *.rpm
+4. yum install kernel-devel cpp gcc gcc-c++
+5. make Autoconfig/World/InstallImages at /usr/lpp/mmfs/src
+6.# mmcrcluster -N /tmp/gpfsfile -p compute2 -s compute1 -r /usr/bin/ssh -R /usr/bin/scp -C sinochem_gpfs
+ ---create cluster
+
+compute2:quorum-manager
+compute1:quorum-manager
+controller:quorum
+networking:quorum
+7. # mmchlicense server --accept -N compute2
+---license
+8. mmcrnsd -F /tmp/nsdfile
+/dev/vdb:compute2::dataAndMetadata::nsd00
+/dev/vdb:compute1::dataAndMetadata::nsd01
+/dev/vdb:controller::dataAndMetadata::nsd02
+/dev/vdb:networking::dataAndMetadata::nsd03
+
+9.mmcrfs /newton gpfs1  -F /tmp/nsdfile -A yes -n 30 -v no
+--create file system

@@ -1,0 +1,65 @@
+#mkdir /databack
+
+#mklv -t jfs2 -y lv_databack datavg 2g
+
+-t 为逻辑卷类型
+
+-y为逻辑卷名字
+
+datavg是指定卷组
+
+2g是逻辑卷的大小
+
+
+#crfs -v jfs2 -d lv_databack -A yes -m /databack
+
+-v 为文件系统的类型
+
+-d为逻辑卷名字
+
+-A 为系统重启后自动挂载
+
+-m为挂载的目录
+
+
+#mount /databack 
+
+1. vSCSI device
+
+
+
+mkvdev -vdev vglv1 -vadapter vhost0 -dev vmrootvg1 
+
+mkvdev -vdev hdisk3 -vadapter vhost0 -dev vmdatavg1
+
+
+
+2. vNetwok device
+
+
+
+将实际物理网卡加以聚合，做成 enternet chanel 网卡
+
+mkvdev -lnagg ent0,ent2mkvdev -lnagg ent1,ent3
+
+
+
+可以看到新生成了 ent8，ent9
+
+ent8 Available EtherChannel / IEEE 802.3ad Link Aggregationent9 Available EtherChannel / IEEE 802.3ad Link Aggregation 
+
+
+
+建立虚拟 sea 网卡，将聚合的 enternet chanel 网卡和虚拟网卡勾连起来，注意 VLAN 的 ID 设置要按设计和微分区设置一致：
+
+mkvdev -sea ent8 -vadapter ent4 -default ent4 -defaultid 1
+
+
+
+
+
+设置 ip 地址，供远程访问 VIO server 使用，这个设置其实和微分区无关。
+
+mktcpip -hostname ss55aa01 -inetaddr 10.25.76.197 -interface en10 -netmask 255.255.255.0-gateway 10.66.76.254[ss55aa01][padmin][/home/padmin]#netstat -in
+
+

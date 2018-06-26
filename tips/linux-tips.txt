@@ -1,0 +1,61 @@
+1. tee -a /etc/filename.txt <<-EOF
+>EOF
+
+2. tcpdump
+    tcpdump udp port 123    # 对本机的udp 123 端口进行监视 123 为ntp的服务端口
+    tcpdump tcp port 23 host 210.27.48.1   # 如果想要获取主机210.27.48.1接收或发出的telnet包，使用如下命令
+    tcpdump -i eth0 src host hostname #下面的命令可以读取主机hostname发送的所有数据：
+
+1， 如果减小卷容量
+a. umount /mnt/
+b.e2fsck -f /dev/vg0/data0
+c.resize2fs /dev/vg0/data0 2G #重设大小
+d.lvreduce -L 2G /dev/vg0/data0 (减小到指定的2G大小)（lvresize也行）
+e.mount
+
+2, 如何增加卷容量
+a. lvextend   -L   +2G   /dev/VolGroup00/LogVol00（lvresize也行）
+b.resize2fs  /dev/VolGroup00/LogVol00
+
+3. lvchange -a n /dev/vg/lv
+
+
+# 总核数 = 物理CPU个数 X 每颗物理CPU的核数 
+# 总逻辑CPU数 = 物理CPU个数 X 每颗物理CPU的核数 X 超线程数
+# 查看物理CPU个数
+cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l
+# 查看每个物理CPU中core的个数(即核数)
+cat /proc/cpuinfo| grep "cpu cores"| uniq
+# 查看逻辑CPU的个数
+cat /proc/cpuinfo| grep "processor"| wc -l
+查看CPU信息（型号）
+cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c
+
+
+
+
+1.  开启虚机嵌套：
+processor type==core2duo 
+# modprobe kvm-intel nested=1
+# systool -m kvm_intel -v |grep -i nested
+2.  Disable IPV6 in R7 or C7
+Check to see if you’re installation is currently set up for IPv6:
+#cat /proc/sys/net/ipv6/conf/all/disable_ipv6
+    If the output is 0, IPv6 is enabled.
+    If the output is 1, IPv6 is already disabled.
+
+Step 1: add this rule in /etc/sysctl.conf : net.ipv6.conf.all.disable_ipv6=1
+
+Step 2: add this rule in /etc/sysconfig/network: NETWORKING_IPV6=no
+
+Step 3: add this setting for each nic X (X is the corresponding number for each nic) in /etc/sysconfig/network-scripts/ifcfg-ethX: IPV6INIT=no
+
+Step 4: disable the ip6tables service : chkconfig ip6tables off
+
+Step 5: Reload the sysctl configuration: # sysctl -p
+
+
+注意：禁用IPV6后，可能会导致某些服务无法启动,比如VSFTP，对于VSFTP，需要修改/etc/vsftpd/vsftpd.conf文件中的listen和listen_ipv6两个选项：
+
+listen=YES
+listen_ipv6=NO
