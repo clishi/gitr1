@@ -62,4 +62,4 @@ mkvdev -sea ent8 -vadapter ent4 -default ent4 -defaultid 1
 
 mktcpip -hostname ss55aa01 -inetaddr 10.25.76.197 -interface en10 -netmask 255.255.255.0-gateway 10.66.76.254[ss55aa01][padmin][/home/padmin]#netstat -in
 
-
+lv
