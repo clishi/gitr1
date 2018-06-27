@@ -1,3 +1,10 @@
+db2 create database ebubak1 using codeset gbk territory CN pagesize 32768
+
+db2 restore db bi_ebu use tsm TAKEN AT 20171113202747 INTO EBUBAK1 logtarget /db2data/db2inst1/db2inst1/NODE0000/SQL00005/SQLOGDIR/ REDIRECT generate script redirect_sample3.sql
+
+db2look -d ebubak1 -e -l -o ./biebu1.sql
+
+
 查看缓冲池大小：
     select * from syscat.bufferpools
     SELECT BPNAME,NPAGES,PAGESIZE FROM SYSCAT.BUFFERPOOLS
