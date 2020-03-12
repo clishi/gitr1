@@ -3,8 +3,8 @@ pipeline {
    stages ("hello") {
       stage ("helloworld") {
           steps {
-                  sh echo "Hello World 2020 03 12"  
-                  sh ls -l
+                  echo "Hello World 2020 03 12"  
+                  echo "d"
               }
         } 
     }
