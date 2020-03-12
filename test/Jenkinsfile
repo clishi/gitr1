@@ -5,7 +5,7 @@ pipeline {
           steps {
                   echo "Hello World 2020 03 12"  
                   echo "what is your name"
-                  ls -l
+                  sh "ls -l"
               }
         } 
     }
