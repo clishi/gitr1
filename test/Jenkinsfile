@@ -6,6 +6,7 @@ pipeline {
                   echo "Hello World 2020 03 12"  
                   echo "what is your name"
                   sh "ls -l"
+                  sh "pwd"
               }
         } 
     }
