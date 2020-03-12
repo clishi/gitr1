@@ -1,10 +1,10 @@
 pipeline {
    agent any
-   stages  {
-      stage ('helloworld') {
+   stages ("hello") {
+      stage ("helloworld") {
           steps {
-                  echo 'Hello World 2020 03 12'  
-                  ls -l
+                  echo "Hello World 2020 03 12"  
+                  echo "what is your name"
               }
         } 
     }
